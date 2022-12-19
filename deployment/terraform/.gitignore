@@ -1,0 +1,14 @@
+# Terraform hidden directory
+.terraform
+
+# Plan files
+*.ter
+
+# Var files for local testing, variables shouldn't be committed to repos
+*.tfvars
+
+# State files
+*.tfstate*
+
+# Dependency lock file
+.terraform.lock.hcl

@@ -1,0 +1,24 @@
+/* ==========================================================================
+   #EMBED/DEFAULT
+   ========================================================================== */
+
+.embed {
+    display: block;
+    margin-bottom: $spacing-default;
+}
+
+.embed__source {
+    margin-bottom: $spacing-small;
+
+    > embed,
+    > iframe,
+    > object,
+    > video {
+        height: var(--embedDefaultHeight);
+        width: 100%;
+    }
+}
+
+.embed__caption {
+    font-style: italic;
+}

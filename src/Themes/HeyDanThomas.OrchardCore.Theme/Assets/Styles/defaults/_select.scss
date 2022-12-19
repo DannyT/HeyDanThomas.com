@@ -1,0 +1,15 @@
+/* ==========================================================================
+   #SELECT
+   ========================================================================== */
+
+select {
+    border: var(--formBorderSize) solid var(--colorTextLight);
+    display: block;
+    padding: var(--formElementPaddingVertical)
+        var(--formElementPaddingHorizontal);
+    width: auto;
+
+    &:focus {
+        @include focus-form-element;
+    }
+}

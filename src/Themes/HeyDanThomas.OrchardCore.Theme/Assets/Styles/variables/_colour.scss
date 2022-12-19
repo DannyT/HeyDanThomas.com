@@ -1,0 +1,34 @@
+/* ==========================================================================
+   #COLOURS
+   ========================================================================== */
+
+$color-grey-light: #C4C2C3;
+
+:root {
+    --colorBlack: #070f26;
+    --colorGrey: ##3F3C36;
+    --colorGreyLight: #{$color-grey-light};
+    --colorWhite: #ffffff;
+
+    --colorAlertBackground: var(--colorGreyLight);
+    --colorAlertErrorBackground: #e49393;
+    --colorAlertErrorText: #310606;
+    --colorAlertSuccessBackground: #93e493;
+    --colorAlertSuccessText: #093109;
+
+    --colorCarouselIndicator: #747474;
+    --colorCarouselIndicatorActive: #ffffff;
+    --colorCarouselIndicatorFocus: #c4c4c4;
+
+    --colorError: #e20000;
+
+    --colorPrimary: #4FADF4;
+    --colorPrimaryActive: #{darken(#4FADF4, 10%)};
+    --colorSecondary: #3D90D9;
+    --colorSecondaryActive: #{darken(#3D90D9, 10%)};
+
+    --colorSiteBackground: var(--colorWhite);
+    --colorTextDefault: var(--colorBlack);
+    --colorTextInverted: var(--colorWhite);
+    --colorTextLight: var(--colorGrey);
+}

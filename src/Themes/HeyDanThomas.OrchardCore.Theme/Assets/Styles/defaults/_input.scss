@@ -1,0 +1,24 @@
+/* ==========================================================================
+   #INPUT
+   ========================================================================== */
+
+input {
+    border: var(--formBorderSize) solid var(--colorTextLight);
+    display: block;
+    padding: var(--formElementPaddingVertical)
+        var(--formElementPaddingHorizontal);
+    width: 100%;
+
+    background-color: transparent;
+    outline: none;
+
+    text-indent: 0;
+
+    &:focus {
+        @include focus-form-element;
+    }
+
+    &[type='file'] {
+        border: 0;
+    }
+}

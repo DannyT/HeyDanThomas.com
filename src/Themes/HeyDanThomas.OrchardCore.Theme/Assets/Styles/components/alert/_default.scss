@@ -1,0 +1,14 @@
+/* ==========================================================================
+   #ALERT/DEFAULT
+   ========================================================================== */
+
+.alert {
+    padding-bottom: $alert-message-padding-bottom;
+    padding-top: $alert-message-padding-top;
+
+    background-color: var(--colorAlertBackground);
+
+    a {
+        color: inherit;
+    }
+}

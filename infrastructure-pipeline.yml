@@ -1,0 +1,233 @@
+resources:
+  - repo: self
+
+trigger:
+  tags:
+    include:
+      - "*"
+  paths:
+    include:
+      - deployment/*
+      - infrastructure-pipeline.yml
+
+variables:
+  TF_LOCATION: '$(System.DefaultWorkingDirectory)/deployment/terraform/azure'
+
+stages:
+- stage: staging_infrastructure_plan
+  displayName: Staging Infrastructure Plan
+  condition: and(always(), or(eq(variables['build.sourceBranch'], 'refs/heads/main'), startsWith(variables['build.sourceBranch'], 'refs/tags/')))
+  jobs:
+  - deployment: staging_infrastructure_plan
+    displayName: Staging Infrastructure
+    environment: 'Staging'
+    variables:
+      - group: 'Staging Base'
+      - group: 'Staging'
+    pool:
+      vmImage: 'windows-latest'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_DNS_RG_NAME]$(tf-var-dns-rg-name)"
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_DNS_ZONE]$(tf-var-dns-zone)"
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_ENV]$(tf-var-env)"
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_RG_NAME]$(tf-var-rg-name)"
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_SP_NAME]$(tf-var-sp-name)"
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_SQL_ELASTIC_POOL]$(tf-var-sql-elastic-pool)"
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_SQL_SERVER_NAME]$(tf-var-sql-server-name)"
+          - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@0
+            displayName: 'Use Terraform'
+            inputs:
+              terraformVersion: 1.1.9
+          - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@0
+            displayName: 'Terraform Init'
+            inputs:
+              command: init
+              workingDirectory: '$(TF_LOCATION)'
+              backendType: azurerm
+              backendServiceArm: 'Dev Ops Staging'
+              ensureBackend: true
+              backendAzureRmResourceGroupName: '$(state-storage-resource-group)'
+              backendAzureRmResourceGroupLocation: '$(state-storage-location)'
+              backendAzureRmStorageAccountName: '$(state-storage-account)'
+              backendAzureRmStorageAccountSku: 'Standard_LRS'
+              backendAzureRmContainerName: '$(state-storage-container)'
+              backendAzureRmKey: '$(TF_VAR_ENV)'
+          - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@0
+            displayName: 'Terraform Plan'
+            inputs:
+              command: plan
+              workingDirectory: '$(TF_LOCATION)'
+              environmentServiceName: 'Dev Ops Staging'
+              commandOptions: '-out plan.ter'
+
+- stage: staging_infrastructure_apply
+  dependsOn: staging_infrastructure_plan
+  displayName: Staging Infrastructure Apply
+  condition: and(succeeded(), or(eq(variables['build.sourceBranch'], 'refs/heads/main'), startsWith(variables['build.sourceBranch'], 'refs/tags/')))
+  jobs:
+  - deployment: staging_infrastructure_apply
+    displayName: Staging Infrastructure Apply
+    environment: 'Staging Approval'
+    variables:
+      - group: 'Staging Base'
+      - group: 'Staging'
+    pool:
+      vmImage: 'windows-latest'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_DNS_RG_NAME]$(tf-var-dns-rg-name)"
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_DNS_ZONE]$(tf-var-dns-zone)"
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_ENV]$(tf-var-env)"
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_RG_NAME]$(tf-var-rg-name)"
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_SP_NAME]$(tf-var-sp-name)"
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_SQL_ELASTIC_POOL]$(tf-var-sql-elastic-pool)"
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_SQL_SERVER_NAME]$(tf-var-sql-server-name)"
+          - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@0
+            displayName: 'Use Terraform'
+            inputs:
+              terraformVersion: 1.1.9
+          - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@0
+            displayName: 'Terraform Init'
+            inputs:
+              command: init
+              workingDirectory: '$(TF_LOCATION)'
+              backendType: azurerm
+              backendServiceArm: 'Dev Ops Staging'
+              ensureBackend: true
+              backendAzureRmResourceGroupName: '$(state-storage-resource-group)'
+              backendAzureRmResourceGroupLocation: '$(state-storage-location)'
+              backendAzureRmStorageAccountName: '$(state-storage-account)'
+              backendAzureRmStorageAccountSku: 'Standard_LRS'
+              backendAzureRmContainerName: '$(state-storage-container)'
+              backendAzureRmKey: '$(TF_VAR_ENV)'
+          - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@0
+            displayName: 'Terraform Plan'
+            inputs:
+              command: plan
+              workingDirectory: '$(TF_LOCATION)'
+              environmentServiceName: 'Dev Ops Staging'
+              commandOptions: '-out plan.ter'
+          - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@0
+            displayName: 'Terraform Apply'
+            inputs:
+              command: apply
+              workingDirectory: '$(TF_LOCATION)'
+              environmentServiceName: 'Dev Ops Staging'
+              commandOptions: '-auto-approve'
+
+- stage: prod_infrastructure_plan
+  displayName: Prod Infrastructure Plan
+  condition: and(always(), startsWith(variables['build.sourceBranch'], 'refs/tags/'))
+  jobs:
+  - deployment: prod_infrastructure_plan
+    displayName: Prod Infrastructure Plan
+    environment: 'Prod'
+    variables:
+      - group: 'Prod Base'
+      - group: 'Prod'
+    pool:
+      vmImage: 'windows-latest'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_DNS_RG_NAME]$(tf-var-dns-rg-name)"
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_DNS_ZONE]$(tf-var-dns-zone)"
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_ENV]$(tf-var-env)"
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_RG_NAME]$(tf-var-rg-name)"
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_RG_NAME_ALT]$(tf-var-rg-name-alt)"
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_SP_NAME]$(tf-var-sp-name)"
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_SQL_ELASTIC_POOL]$(tf-var-sql-elastic-pool)"
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_SQL_SERVER_NAME]$(tf-var-sql-server-name)"
+          - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@0
+            displayName: 'Use Terraform'
+            inputs:
+              terraformVersion: 1.1.9
+          - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@0
+            displayName: 'Terraform Init'
+            inputs:
+              command: init
+              workingDirectory: '$(TF_LOCATION)'
+              backendType: azurerm
+              backendServiceArm: 'Dev Ops Prod'
+              ensureBackend: true
+              backendAzureRmResourceGroupName: '$(state-storage-resource-group)'
+              backendAzureRmResourceGroupLocation: '$(state-storage-location)'
+              backendAzureRmStorageAccountName: '$(state-storage-account)'
+              backendAzureRmStorageAccountSku: 'Standard_LRS'
+              backendAzureRmContainerName: '$(state-storage-container)'
+              backendAzureRmKey: '$(TF_VAR_ENV)'
+          - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@0
+            displayName: 'Terraform Plan'
+            inputs:
+              command: plan
+              workingDirectory: '$(TF_LOCATION)'
+              environmentServiceName: 'Dev Ops Prod'
+              commandOptions: '-out plan.ter'
+
+- stage: prod_infrastructure_apply
+  dependsOn: prod_infrastructure_plan
+  displayName: Prod Infrastructure Apply
+  condition: and(always(), startsWith(variables['build.sourceBranch'], 'refs/tags/'))
+  jobs:
+  - deployment: prod_infrastructure_apply
+    displayName: Prod Infrastructure Apply
+    environment: 'Prod'
+    variables:
+      - group: 'Prod Base'
+      - group: 'Prod'
+    pool:
+      vmImage: 'windows-latest'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_DNS_RG_NAME]$(tf-var-dns-rg-name)"
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_DNS_ZONE]$(tf-var-dns-zone)"
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_ENV]$(tf-var-env)"
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_RG_NAME]$(tf-var-rg-name)"
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_RG_NAME_ALT]$(tf-var-rg-name-alt)"
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_SP_NAME]$(tf-var-sp-name)"
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_SQL_ELASTIC_POOL]$(tf-var-sql-elastic-pool)"
+          - bash: echo "##vso[task.setvariable variable=TF_VAR_SQL_SERVER_NAME]$(tf-var-sql-server-name)"
+          - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@0
+            displayName: 'Use Terraform'
+            inputs:
+              terraformVersion: 1.1.9
+          - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@0
+            displayName: 'Terraform Init'
+            inputs:
+              command: init
+              workingDirectory: '$(TF_LOCATION)'
+              backendType: azurerm
+              backendServiceArm: 'Dev Ops Prod'
+              ensureBackend: true
+              backendAzureRmResourceGroupName: '$(state-storage-resource-group)'
+              backendAzureRmResourceGroupLocation: '$(state-storage-location)'
+              backendAzureRmStorageAccountName: '$(state-storage-account)'
+              backendAzureRmStorageAccountSku: 'Standard_LRS'
+              backendAzureRmContainerName: '$(state-storage-container)'
+              backendAzureRmKey: '$(TF_VAR_ENV)'
+          - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@0
+            displayName: 'Terraform Plan'
+            inputs:
+              command: plan
+              workingDirectory: '$(TF_LOCATION)'
+              environmentServiceName: 'Dev Ops Prod'
+              commandOptions: '-out plan.ter'
+          - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-cli.TerraformCLI@0
+            displayName: 'Terraform Apply'
+            inputs:
+              command: apply
+              workingDirectory: '$(TF_LOCATION)'
+              environmentServiceName: 'Dev Ops Prod'
+              commandOptions: '-auto-approve plan.ter'

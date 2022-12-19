@@ -1,0 +1,119 @@
+resources:
+  - repo: self
+
+trigger:
+  tags:
+    include:
+      - "*"
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - src/*
+      - azure-pipelines.yml
+      - nuget.config
+
+variables:
+  buildConfiguration: "Release"
+
+stages:
+  - stage: build
+    displayName: Build
+    variables:
+      - group: "Global"
+    jobs:
+      - job: Build
+        pool:
+          vmImage: "windows-latest"
+        steps:
+          - task: UseNode@1
+            inputs:
+              version: "16.x"
+              checkLatest: true
+
+          - task: SonarCloudPrepare@1
+            displayName: "Prepare SonarCloud Analysis"
+            inputs:
+              SonarCloud: "SC"
+              organization: "$(SC_ORGANIZATION)"
+              scannerMode: "MSBuild"
+              projectKey: "$(SC_PROJECT)"
+              projectName: "$(SC_PROJECT)"
+
+          - task: DotNetCoreCLI@2
+            displayName: "dotnet build"
+            inputs:
+              command: build
+              arguments: "--configuration $(buildConfiguration)"
+
+          - task: SonarCloudAnalyze@1
+            displayName: "Run SonarCloud Analysis"
+
+          - task: DotNetCoreCLI@2
+            displayName: "dotnet publish"
+            inputs:
+              command: publish
+              publishWebProjects: false
+              projects: '.\src\HeyDanThomas.OrchardCore.Site\HeyDanThomas.OrchardCore.Site.csproj'
+              arguments: "--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)"
+
+          - task: PublishBuildArtifacts@1
+            displayName: "Publishing"
+            inputs:
+              pathtoPublish: "$(Build.ArtifactStagingDirectory)"
+
+          - task: SonarCloudPublish@1
+            displayName: "Publish SonarCloud Results"
+
+  - stage: staging_deploy
+    dependsOn: build
+    displayName: Staging Deployment
+    condition: and(succeeded(), or(eq(variables['build.sourceBranch'], 'refs/heads/main'), startsWith(variables['build.sourceBranch'], 'refs/tags/')))
+    variables:
+      - group: "Staging"
+    jobs:
+      - deployment: staging_deploy
+        displayName: Staging Deploy
+        pool:
+          vmImage: "windows-latest"
+        environment: "Staging"
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureRmWebAppDeployment@4
+                  displayName: "App Service Deploy"
+                  inputs:
+                    azureSubscription: "Dev Ops Staging"
+                    WebAppName: "$(APP_SERVICE_NAME)"
+                    packageForLinux: "$(Pipeline.Workspace)/drop/HeyDanThomas.OrchardCore.Site.zip"
+                    enableCustomDeployment: true
+                    RemoveAdditionalFilesFlag: true
+                    AdditionalArguments: "-skip:objectName=dirPath,absolutePath='\\\\wwwroot\\\\is-cache' -skip:objectName=dirPath,absolutePath='\\\\wwwroot\\\\ms-cache' -skip:objectName=dirPath,absolutePath='\\\\wwwroot\\\\sm-cache'"
+
+  - stage: prod_deploy
+    dependsOn: build
+    displayName: Prod Deployment
+    condition: and(succeeded(), startsWith(variables['build.sourceBranch'], 'refs/tags/'))
+    variables:
+      - group: "Prod"
+    jobs:
+      - deployment: prod_deploy
+        displayName: Prod Deploy
+        pool:
+          vmImage: "windows-latest"
+        environment: "Prod"
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureRmWebAppDeployment@4
+                  displayName: "App Service Deploy"
+                  inputs:
+                    azureSubscription: "Dev Ops Prod"
+                    WebAppName: "$(APP_SERVICE_NAME)"
+                    packageForLinux: "$(Pipeline.Workspace)/drop/HeyDanThomas.OrchardCore.Site.zip"
+                    enableCustomDeployment: true
+                    RemoveAdditionalFilesFlag: true
+                    AdditionalArguments: "-skip:objectName=dirPath,absolutePath='\\\\wwwroot\\\\is-cache' -skip:objectName=dirPath,absolutePath='\\\\wwwroot\\\\ms-cache' -skip:objectName=dirPath,absolutePath='\\\\wwwroot\\\\sm-cache'"
