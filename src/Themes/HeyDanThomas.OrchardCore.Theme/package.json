@@ -7,7 +7,7 @@
         "build": "npm i --no-audit && npm run clean && parcel build --no-cache --no-content-hash",
         "clean": "rimraf wwwroot/scripts wwwroot/css",
         "develop": "npm run clean && parcel watch --https --no-content-hash",
-        "install-git-hooks": "cd .. && husky install",
+        "install-git-hooks": "cd ../../../ && husky install src/Themes/HeyDanThomas.OrchardCore.Theme/.husky",
         "lint": "lint-staged",
         "prepare": "npm run install-git-hooks",
         "start": "npm i && npm run develop"
