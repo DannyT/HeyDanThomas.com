@@ -2,11 +2,13 @@
    #COLOURS
    ========================================================================== */
 
-$color-grey-light: #C4C2C3;
+@use "sass:color";
+
+$color-grey-light: #c4c2c3;
 
 :root {
-    --colorBlack: #070f26;
-    --colorGrey: ##3F3C36;
+    --colorBlack: #272829;
+    --colorGrey: #3f3c36;
     --colorGreyLight: #{$color-grey-light};
     --colorWhite: #ffffff;
 
@@ -22,13 +24,15 @@ $color-grey-light: #C4C2C3;
 
     --colorError: #e20000;
 
-    --colorPrimary: #4FADF4;
-    --colorPrimaryActive: #{darken(#4FADF4, 10%)};
-    --colorSecondary: #3D90D9;
-    --colorSecondaryActive: #{darken(#3D90D9, 10%)};
+    --colorPrimary: #4fadf4;
+    --colorPrimaryActive: #{color.adjust(#4fadf4, $lightness: -10%)};
+    --colorPrimaryAlt: #3d90d9;
+    --colorPrimaryAltActive: #3d90d9;
+    --colorSecondary: #ffa924;
+    --colorSecondaryActive: #{color.adjust(#ffa924, $lightness: -10%)};
 
-    --colorSiteBackground: var(--colorWhite);
-    --colorTextDefault: var(--colorBlack);
-    --colorTextInverted: var(--colorWhite);
+    --colorSiteBackground: var(--colorBlack);
+    --colorTextDefault: var(--colorWhite);
+    --colorTextInverted: var(--colorBlack);
     --colorTextLight: var(--colorGrey);
 }

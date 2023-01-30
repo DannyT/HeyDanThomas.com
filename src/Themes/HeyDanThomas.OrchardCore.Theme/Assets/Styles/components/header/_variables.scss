@@ -21,7 +21,7 @@ $header-nav-button-width: 2.4rem;
 
     @include mq($from: tablet) {
         --headerContentHeight: 10rem;
-        --headerLogoMaxHeight: 6rem;
-        --headerLogoMaxWidth: 15rem;
+        --headerLogoMaxHeight: 7rem;
+        --headerLogoMaxWidth: 30rem;
     }
 }

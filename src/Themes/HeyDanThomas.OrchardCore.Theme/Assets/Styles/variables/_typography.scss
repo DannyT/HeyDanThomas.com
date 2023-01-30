@@ -3,8 +3,8 @@
    ========================================================================== */
 
 :root {
-    --fontFamilyDefault: 'Work Sans', sans-serif;
-    --fontFamilyHeading: 'Manuale', sans-serif;
+    --fontFamilyDefault: "Roboto", sans-serif;
+    --fontFamilyHeading: "Etna", "Arial Black", sans-serif;
     --fontSizeBase: 1.6rem;
     --fontSizeBaseEm: 1.6em;
     --fontSizeHero: var(--fontSizeH1);
@@ -23,8 +23,8 @@
     --fontStyleH4: var(--fontStyleDefault);
     --fontStyleH5: var(--fontStyleDefault);
     --fontStyleH6: var(--fontStyleDefault);
-    --fontWeightBold: 700;
-    --fontWeightDefault: 400;
+    --fontWeightBold: 600;
+    --fontWeightDefault: 200;
     --fontWeightH1: var(--fontWeightBold);
     --fontWeightH2: var(--fontWeightBold);
     --fontWeightH3: var(--fontWeightBold);
@@ -50,8 +50,10 @@
     @include mq($from: desktopSmall) {
         --fontSizeBase: 1.8rem;
         --fontSizeBaseEm: 1.8em;
-        --fontSizeH1: calc(var(--fontSizeBase) * 2.666); // 48
-        --fontSizeH2: calc(var(--fontSizeBase) * 1.777); // 32
+        --fontSizeH1: calc((90 / 16) * var(--fontSizeBase));
+        --fontSizeH2: calc(
+            (32 / 16) * var(--fontSizeBase)
+        ); //calc(var(--fontSizeBase) * 1.777); // 32
         --fontSizeH3: calc(var(--fontSizeBase) * 1.333); // 24
         --fontSizeLarge: calc(var(--fontSizeBase) * 1.111); // 20
         --fontSizeSmall: calc(var(--fontSizeBase) * 0.888); // 16

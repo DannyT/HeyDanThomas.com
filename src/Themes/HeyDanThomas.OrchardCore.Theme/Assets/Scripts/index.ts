@@ -1,13 +1,11 @@
-import 'picturefill';
-
-import addClassOnScroll from './components/addClassOnScroll';
-import carousel from './components/carousel';
-import gallery from './components/gallery';
-import inViewport from './components/inViewport';
-import nav from './components/nav';
-import parallax from './components/parallax';
-import scrollbarWidth from './components/scrollbarWidth';
-import toggleNav from './components/toggleNav';
+import addClassOnScroll from "./components/addClassOnScroll";
+import carousel from "./components/carousel";
+import gallery from "./components/gallery";
+import inViewport from "./components/inViewport";
+import nav from "./components/nav";
+import parallax from "./components/parallax";
+import scrollbarWidth from "./components/scrollbarWidth";
+import toggleNav from "./components/toggleNav";
 
 /**
  * Called once the page is loaded and handles initialising
@@ -26,7 +24,7 @@ const init = () => {
 
 const canInit = () => {
     const regReady = (window as any).attachEvent ? /d$|^c/ : /d$|^c|^i/;
-    return regReady.test(document.readyState || '');
+    return regReady.test(document.readyState || "");
 };
 
 let timer: NodeJS.Timeout;
@@ -48,7 +46,7 @@ const checkCanInit = () => {
 // https://www.paulirish.com/2009/avoiding-the-fouc-v3/
 document.documentElement.className = document.documentElement.className.replace(
     /\bno-js\b/,
-    'js'
+    "js"
 );
 
 checkCanInit();
