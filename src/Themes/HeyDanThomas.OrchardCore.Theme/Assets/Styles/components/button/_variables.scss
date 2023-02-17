@@ -7,9 +7,9 @@
     --buttonBorderThickness: var(--borderWidth);
     --buttonDisabledOpacity: 0.3;
     --buttonFontSize: var(--fontSizeBase);
-    --buttonFontWeight: normal;
+    --buttonFontWeight: bold;
     --buttonLineHeight: var(--lineHeightDefault);
     --buttonPaddingHorizontal: #{$spacing-large};
-    --buttonPaddingVertical: #{$spacing-default};
+    --buttonPaddingVertical: #{$spacing-small};
     --buttonTextTransform: none;
 }

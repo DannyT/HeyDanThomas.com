@@ -28,19 +28,7 @@ h1 {
 
 h2 {
     @include text-heading("H2");
-    background-color: var(--colorPrimary);
-    background-image: linear-gradient(
-        140deg,
-        var(--colorPrimary),
-        var(--colorGreyLight)
-    );
     color: var(--colorPrimary);
-    background-size: 100%;
-    background-clip: text;
-    -webkit-background-clip: text;
-    -moz-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    -moz-text-fill-color: transparent;
     //text-shadow: 2px 2px 2px var(--colorPrimaryActive);
 }
 

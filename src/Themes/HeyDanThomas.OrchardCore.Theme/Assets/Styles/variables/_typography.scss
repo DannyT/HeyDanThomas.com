@@ -51,9 +51,7 @@
         --fontSizeBase: 1.8rem;
         --fontSizeBaseEm: 1.8em;
         --fontSizeH1: calc((90 / 16) * var(--fontSizeBase));
-        --fontSizeH2: calc(
-            (32 / 16) * var(--fontSizeBase)
-        ); //calc(var(--fontSizeBase) * 1.777); // 32
+        --fontSizeH2: calc((48 / 16) * var(--fontSizeBase));
         --fontSizeH3: calc(var(--fontSizeBase) * 1.333); // 24
         --fontSizeLarge: calc(var(--fontSizeBase) * 1.111); // 20
         --fontSizeSmall: calc(var(--fontSizeBase) * 0.888); // 16

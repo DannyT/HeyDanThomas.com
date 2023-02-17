@@ -1,7 +1,7 @@
 /* ==========================================================================
-   #CONTENT FEED/VARIABLES
+   #ANGLED GRID
    ========================================================================== */
 
-:root {
-    --contentFeedTitleTextTransform: none;
-}
+@import "variables";
+
+@import "default";
