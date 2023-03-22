@@ -22,5 +22,7 @@
     &__content {
         position: relative;
         z-index: $z-index-nudge-forward;
+        max-width: $content-width;
+        width: 100%;
     }
 }
